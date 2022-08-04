@@ -129,7 +129,7 @@ class STDA(BaseEstimator, TransformerMixin, ClassifierMixin):
            Training data.
 
         y : array-like of shape (n_samples,)
-            Target values.
+            Target values. {-1, 1} or {0, 1}
 
         Returns
         -------
@@ -187,8 +187,8 @@ class STDA(BaseEstimator, TransformerMixin, ClassifierMixin):
                     W2.append(eig_vecs[:, loc_idx][:, :self.L])
 
             # stop criterion
-            if self.iter_times >= 4 or self.iter_times > self.max_iter:
-                if LA.norm(W1[-1]-W1[-2], ord=2) < self.eps and LA.norm(W2[-1]-W2[-2], ord=2) < self.eps:
+            if self.iter_times >= 4:
+                if (LA.norm(W1[-1]-W1[-2], ord=2) < self.eps and LA.norm(W2[-1]-W2[-2], ord=2) < self.eps) or (self.iter_times > self.max_iter):
                     self.W1, self.W2 = W1[-1], W2[-1]
 
                     f_c1 = np.matmul(np.matmul(self.W1.T, X1), self.W2).reshape(n_samples_c1, -1)
@@ -198,7 +198,7 @@ class STDA(BaseEstimator, TransformerMixin, ClassifierMixin):
 
                     return self
 
-                elif self.iter_times > 200:
+                if self.iter_times > 200:
                     warnings.warn("The alternating iteration has been performed many times (>200). "
                                   "Model may be un-convergence.")
 
@@ -213,14 +213,15 @@ class STDA(BaseEstimator, TransformerMixin, ClassifierMixin):
 
         Returns
         -------
-        H_dv: decision values.
+        H_dv: ndarray of shape (n_samples, )
+            decision values.
         """
         n_samples = Xtest.shape[0]
         f_hat = np.matmul(np.matmul(self.W1.T, Xtest), self.W2).reshape(n_samples, -1)
 
         H_dv = f_hat @ self.wf.T
 
-        return H_dv
+        return H_dv.squeeze()
 
 
 if __name__ == '__main__':

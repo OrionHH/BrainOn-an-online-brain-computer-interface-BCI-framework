@@ -47,8 +47,8 @@ class SKLDA(BaseEstimator, TransformerMixin, ClassifierMixin):
     def __init__(self):
         pass
 
-    def fit(self, X1: ndarray, X2: ndarray):
-        """
+    def fit(self, X: ndarray, y: ndarray):
+        """Fit SKLDA.
 
         Parameters
         ----------
@@ -58,12 +58,26 @@ class SKLDA(BaseEstimator, TransformerMixin, ClassifierMixin):
         X2: ndarray of shape (n_samples, n_features)
             samples for class 2 (i.e. negative samples)
 
+        X: array-like of shape (n_samples, n_features)
+           Training data.
+
+        y : array-like of shape (n_samples,)
+            Target values, {-1, 1} or {0, 1}.
+
         Returns
         -------
         self: object
             Some parameters (sigma_c1, sigma_c2, D) of SKLDA.
 
         """
+        self.classes_ = np.unique(y)
+        _, self.n_features = X.shape
+        n_classes = len(self.classes_)
+
+        # Extract samples of two classes
+        loc = [np.argwhere(y == self.classes_[idx_class]).squeeze() for idx_class in range(n_classes)]
+        X1, X2 = X[loc[1], :], X[loc[0], :]  # X1: positive samples. X2: negative samples.
+
         self.n_samples_c1, self.n_samples_c2 = X1.shape[0], X2.shape[0]
         n_sum = self.n_samples_c1 + self.n_samples_c2
 

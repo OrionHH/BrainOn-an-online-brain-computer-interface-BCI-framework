@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 '''
-@ author: Jin Han
-@ email: jinhan9165@gmail.com
+@ author: Orion Han
+@ email: jinhan@tju.edu.cn
 @ Created on: 2020-03-24
 version 1.0
 update:
@@ -27,6 +27,8 @@ Application: classic algorithms,
 import numpy as np
 from numpy import linalg as LA
 from sklearn.cross_decomposition import CCA
+
+from STDA import LDA_kernel
 
 def trca_compute(Xin, subspace_idx=None):
     '''
@@ -125,8 +127,9 @@ def cca_manu(Xin, Yin):
     # compute correlation coeficient
     X_proj = np.dot(eig_vectors_x.T, Xin)
     Y_proj = np.dot(eig_vectors_y.T, Yin)
-    rr_coef = np.zeros((X_proj.shape[0]))
-    for i in range(X_proj.shape[0]):
+    n_dims = X_proj.shape[0] if X_proj.shape[0] < Y_proj.shape[0] else Y_proj.shape[0]
+    rr_coef = np.zeros((n_dims))
+    for i in range(n_dims):
         rr_coef[i] = np.corrcoef(X_proj[i,:], Y_proj[i,:])[0,1]
     # print('Now, algorithm cca_manu is finished.')
 
@@ -376,6 +379,9 @@ def dsp_compute(Xclass1, Xclass2):
     # print('Now, algorithm DSP is running...')
     template_1 = Xclass1.mean(axis=2, keepdims=False)
     template_2 = Xclass2.mean(axis=2, keepdims=False)
+
+    template_1 -= template_1.mean(axis=1, keepdims=True)
+    template_2 -= template_2.mean(axis=1, keepdims=True)
     X_buff = np.vstack((template_1, template_2))
 
     cov_all = np.cov(X_buff, rowvar=True, bias=False)
@@ -452,16 +458,16 @@ def dcpm_compute(Xclass1, Xclass2, Xtest, dsp_idx=None, cca_idx=None, cca_rr_idx
 
         rr_coef[0,0,i] = np.corrcoef(template_1.reshape((1,-1)), test_data.reshape((1,-1)))[0,1] # p11
         rr_coef[1,0,i] = np.corrcoef(template_2.reshape((1,-1)), test_data.reshape((1,-1)))[0,1] # p21
-        rr_coef[0,1,i] = np.cov(template_1-test_data).diagonal().mean() # p12
-        rr_coef[1,1,i] = np.cov(template_2-test_data).diagonal().mean() # p22
+        rr_coef[0,1,i] = -np.cov(template_1-test_data).diagonal().mean() # p12
+        rr_coef[1,1,i] = -np.cov(template_2-test_data).diagonal().mean() # p22
 
-        U_class1, _, V_test1, _, rr1 = cca_manu(template_1, test_data)
-        U_class2, _, V_test2, _, rr2 = cca_manu(template_2, test_data)
+        U_class1, V_test1, rr1 = cca_manu(template_1, test_data)
+        U_class2, V_test2, rr2 = cca_manu(template_2, test_data)
 
-        cca_rr_idx = int(cca_rr_idx) if cca_rr_idx is not None else int(np.round(rr1.shape[1]/2))
-        cca_idx = int(cca_idx) if cca_idx is not None else int(np.round(U_class1.shape[1]/2))
-        rr_coef[0,2,i] = rr1[0, :cca_rr_idx].mean() # p13
-        rr_coef[1,2,i] = rr2[0, :cca_rr_idx].mean() # p23
+        cca_rr_idx = int(cca_rr_idx) if cca_rr_idx is not None else int(np.round(rr1.shape[-1]/2))
+        cca_idx = int(cca_idx) if cca_idx is not None else int(np.round(U_class1.shape[-1]/2))
+        rr_coef[0,2,i] = rr1[:cca_rr_idx].mean() # p13
+        rr_coef[1,2,i] = rr2[:cca_rr_idx].mean() # p23
 
         buff1 = U_class1[:, :cca_idx].T.dot(template_1).reshape((1,-1))
         buff2 = U_class1[:, :cca_idx].T.dot(test_data).reshape((1,-1))
@@ -479,42 +485,76 @@ def dcpm_compute(Xclass1, Xclass2, Xtest, dsp_idx=None, cca_idx=None, cca_rr_idx
         buff2 = V_test2[:, :cca_idx].T.dot(test_data).reshape((1,-1))
         rr_coef[1,4,i] = np.corrcoef(buff1, buff2)[0,1] # p25
 
-    # rr_coef = rr_coef.sum(axis=1, keepdims=False)
-    return  rr_coef
+    idx_using = [0, 1]  # 0, 1, 4
+    rr_ = rr_coef[:, idx_using, :].sum(axis=1, keepdims=False)
 
-def corr_coeff_manu(xin_1, xin_2):
+    return rr_[0, :] - rr_[1,:]
+
+def dsp_lda(Xclass1, Xclass2, Xtest, dsp_idx=1):
     '''
-    Compute Pearson's correlation coefficient.
-    :param xin_1: row vector, i.e. (1, xx)
-    :param xin_2: row vector, i.e. (1, xx)
+    :param Xclass1: ndarray
+        (n_channels * num of sample points (i.e. n_times) * n_epochs (i.e. n_trials))
+    :param Xclass2: ndarray
+        (n_channels * num of sample points (i.e. n_times) * n_epochs (i.e. n_trials))
+    :param Xtest: ndarray
+        (n_channels * num of sample points (i.e. n_times) * n_epochs (i.e. n_trials))
+    :param dsp_idx: int
+        extract first dsp_idx columns for DSP. If None, set default values (half).
+    :param cca_idx: int
+        extract first cca_idx columns for CCA. If None, set default values (half).
+    :param cca_rr_idx: int
+        extract first cca_rr_idx values for coefficient of CCA. If None, set default values (half).
     :return:
     '''
-    if xin_1.shape != xin_2.shape:
-        raise ValueError('The two input variable dimensions of function corr_coef should be SAME.')
+    if Xtest.ndim < 2:
+        raise ValueError('Xtest should be equal to or greater than two dimensions.')
 
-    xin_1 = xin_1 - xin_1.mean()
-    xin_2 = xin_2 - xin_2.mean()
-    cov_12 = xin_1.dot(xin_2.T)
-    cov_11, cov_22 = np.sqrt(xin_1.dot(xin_1.T)), np.sqrt(xin_2.dot(xin_2.T))
-    result_coeff = cov_12 / (cov_11 * cov_22)
+    # print('Now, algorithm DCPM is running...')
+    dsp_vals, dsp_vectors = dsp_compute(Xclass1, Xclass2)
 
-    return result_coeff
+    dsp_idx = int(dsp_idx) if dsp_idx is not None else int(np.round(Xclass1.shape[0]/2))
+    # if Xclass1.ndim == 3:
+    #     Xclass_tmp1 = Xclass1.mean(axis=-1)
+    # if Xclass2.ndim == 3:
+    #     Xclass_tmp2 = Xclass2.mean(axis=-1)
+    # Xclass_tmp1 = Xclass_tmp1 - Xclass_tmp1.mean(axis=-1, keepdims=True)
+    # Xclass_tmp2 = Xclass_tmp2 - Xclass_tmp2.mean(axis=-1, keepdims=True)
+
+    # average points across trials projected on feature subspaces of DSP
+    tmp_c1 = np.matmul(dsp_vectors[:,:dsp_idx][np.newaxis,:].transpose([0,2,1]), Xclass1.transpose([2, 0, 1])).squeeze() # out: (dsp_idx * n_times)
+    tmp_c2 = np.matmul(dsp_vectors[:,:dsp_idx][np.newaxis,:].transpose([0,2,1]), Xclass2.transpose([2, 0, 1])).squeeze() # out: (dsp_idx * n_times)
+
+    tmp_test = np.matmul(dsp_vectors[:,:dsp_idx][np.newaxis,:].transpose([0,2,1]), Xtest.transpose([2, 0, 1])).squeeze() # out: (dsp_idx * n_times)
+
+    weight_vec, lda_threshold = LDA_kernel(tmp_c1, tmp_c2)
+
+    dv_proba = weight_vec @ tmp_test.T
+
+    return dv_proba
+
+
 
 if __name__ == '__main__':
     # unit tests
     # for TRCA
-    Xin = np.random.randn(9,250,6)
-    eig_vals, eig_vectors = trca_compute(Xin)
+    # Xin = np.random.randn(9,250,6)
+    # eig_vals, eig_vectors = trca_compute(Xin)
+    #
+    # # for DSP
+    # Xclass1 = np.random.randint(0,100,(9,125,6))
+    # Xclass2 = np.random.randint(0,100,(9,125,6))
+    # dsp_compute(Xclass1, Xclass2)
+    #
+    # # for cca_manu
+    # Xin = np.random.randint(0,100,(3,6))
+    # Yin = np.random.randint(0,100,(3,6))
+    # eig_vectors_x, eig_vectors_y, RR = cca_manu(Xin, Yin)
 
-    # for DSP
-    Xclass1 = np.random.randint(0,100,(9,125,6))
-    Xclass2 = np.random.randint(0,100,(9,125,6))
-    dsp_compute(Xclass1, Xclass2)
+    # for Extended CCA
+    Xtest = np.random.rand(15, 251)
+    Xtrain =  np.random.rand(15, 251, 5)
+    rr = extended_cca(Xtest, Xtrain, 15, 250, 0, 1, 5, init_phase=None, subspace=None)
 
-    # for cca_manu
-    Xin = np.random.randint(0,100,(3,6))
-    Yin = np.random.randint(0,100,(3,6))
-    eig_vectors_x, eig_vectors_y, RR = cca_manu(Xin, Yin)
 
     # for DCPM
     Xclass1 = np.random.randint(0,100,(9,125,6))
