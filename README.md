@@ -56,7 +56,7 @@ This document is to give you more information about the BrainOn. Click the secti
 
 - **algorithms-folder**  
   Some BCI algorithms to complement Brainda repository, such as Spatial-Temporal Discriminant Analysis (STDA), Shrinkage Linear discriminant analysis (SKLDA), Hierarchical discriminant component analysis (HDCA), Sliding-HDCA, Discriminative Canonical Pattern Matching (DCPM), and so on.  
-  The interface form is consistent with scikit-learn for convenient.
+  The interface form is consistent with scikit-learn for ease of use.
 
 ---
 ## **Flow Diagram**
