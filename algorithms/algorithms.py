@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 '''
-@ author: Orion Han
-@ email: jinhan@tju.edu.cn
+@ author: Jin Han
+@ email: jinhan9165@gmail.com
 @ Created on: 2020-03-24
 version 1.0
 update:

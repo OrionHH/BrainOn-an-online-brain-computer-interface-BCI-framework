@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 """
-@ author: OrionHan
+@ author: Jin Han
 @ email: jinhan9165@gmail.com
-@ Created on: date (e.g.2022-02-15)
+@ Created on: 2022.07
 version 1.0
 update:
 Refer: [1] Blankertz, et al. "Single-trial analysis and classification of ERP components—a tutorial." NeuroImage 56.2 (2011): 814-825.
 
-Application: 
+Application: Shrinkage Linear discriminant analysis (SKLDA), P300 speller
 
 """
 

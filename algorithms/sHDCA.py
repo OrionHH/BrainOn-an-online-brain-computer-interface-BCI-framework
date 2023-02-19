@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 '''
-@ author: Orion Han
-@ email: jinhan@tju.edu.cn
+@ author: Jin Han
+@ email: jinhan9165@gmail.com
 @ Created on: 2022.07
 Refer:
     [1] Sajda, Paul, et al. "In a blink of an eye and a switch of a transistor: cortically coupled computer vision."
@@ -9,7 +9,7 @@ Refer:
     [2] Marathe et al. "Sliding HDCA: single-trial EEG classification to overcome and quantify temporal variability."
         IEEE Transactions on Neural Systems and Rehabilitation Engineering 22.2 (2014): 201-211.
 
-Application: Binary problems, e.g., single trial P300 recognition for BCI.
+Application: Binary problems, e.g., single trial recognition for P300-based BCI.
 
 '''
 

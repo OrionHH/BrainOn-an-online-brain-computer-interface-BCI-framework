@@ -37,20 +37,12 @@ This document is to give you more information about the BrainOn. Click the secti
 - **BasePreProcessing.py**  
   A preprocessing baseframework is mainly used for building offline model for the further online experiment with the training problems.  
 
-- **BaseStimulation.py**  
-  A stimulus presentation framework of BCI paradigms that supplying three BCI paradigms (i.e., P300, SSVEP, MI) as well as new paradigms.  
-  Under development. It will be uploaded later.  
-
-- **demo_stimulation.py**  
-  A demo of SSVEP stimulus derived from the *class BaseStimulation*.  
-  Under development. It will be uploaded later. 
-
 - **ReadNeuroscan.py**  
   A demo of reading live data streaming from the Neuroscan Synamps2 amplifier (a EEG acquisition device, Compumedics Ltd., Melbourne Australia) was implemented by deriving from parent *class BaseFramework*. Although the demo is based on Neuroscan device, it's worth noting that the framework is theoretically compatible for most of EEG devices.  
 
 - **simulate_serve_new_packet.py**  
   Simulate EEG amplifier acting as a server and Distribute data in the fixed time interval.
-  The software USR-TCP232-TEST as a client can be used to debug.
+  The software USR-TCP232-TEST can be used as a client to debug.
   The download link is https://www.pusr.com/support/downloads/usr-tcp232-test-V13.  
 
 - **simulate_online_CNT.py**  
@@ -60,7 +52,7 @@ This document is to give you more information about the BrainOn. Click the secti
   A demo of building offline model was developed based on the hybrid P300-SSVEP BCI by deriving from parent *class BasePreProcessing*.  
 
 - **demo_online_hybridBCI.py**  
-  A demo of BCI online modulation and processing framework was implemented based on the hybrid P300-SSVEP BCI system using above base frameworks. Notably, this program can run correctly if only the hardware platform  is connected, which including an EEG amplifier (Neuroscan in this case), ethernet network cable, and stimulation program.  
+  A demo of BCI online modulation and processing framework was implemented based on the hybrid P300-SSVEP BCI system using above base frameworks. Notably, this program can run properly if only the hardware platform  is connected, which including an EEG amplifier (Neuroscan in this case), ethernet network cable, and stimulation program.  
 
 - **algorithms-folder**  
   Some BCI algorithms to complement Brainda repository, such as Spatial-Temporal Discriminant Analysis (STDA), Shrinkage Linear discriminant analysis (SKLDA), Hierarchical discriminant component analysis (HDCA), Sliding-HDCA, Discriminative Canonical Pattern Matching (DCPM), and so on.  

@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
 """
-@ author: OrionHan
+@ author: Jin Han
 @ email: jinhan9165@gmail.com
 @ Created on: 2022.07
 Refer:
     [1] Sajda, Paul, et al. "In a blink of an eye and a switch of a transistor: cortically coupled computer vision."
         Proceedings of the IEEE 98.3 (2010): 462-478.
 
-Application: Binary problems, e.g., single trial P300 recognition for BCI.
+Application: Binary problems, e.g., single trial recognition for P300-based BCI.
 
 """
 import warnings

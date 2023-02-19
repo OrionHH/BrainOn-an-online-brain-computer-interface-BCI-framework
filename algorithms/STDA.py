@@ -2,13 +2,13 @@
 """
 @ author: Jin Han
 @ email: jinhan9165@gmail.com
-@ Created on: 2022-05
+@ Created on: 2022.05
 version 1.0
 update:
 Refer: [1] Zhang, Yu, et al. "Spatial-temporal discriminant analysis for ERP-based brain-computer interface."
             IEEE Transactions on Neural Systems and Rehabilitation Engineering 21.2 (2013): 233-243.
 
-Application: Spatial-Temporal Discriminant Analysis (STDA)
+Application: Spatial-Temporal Discriminant Analysis (STDA), P300 speller
 
 """
 import warnings
